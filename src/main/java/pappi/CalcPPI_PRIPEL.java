@@ -7,21 +7,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import es.us.isa.ppinot.evaluation.Aggregator;
 import es.us.isa.ppinot.evaluation.Measure;
 import es.us.isa.ppinot.evaluation.TemporalMeasureScope;
-import es.us.isa.ppinot.evaluation.evaluators.LogMeasureEvaluator;
 import es.us.isa.ppinot.evaluation.evaluators.MeasureEvaluator;
 import es.us.isa.ppinot.evaluation.logs.LogProvider;
 import es.us.isa.ppinot.evaluation.logs.MXMLLog;
 import es.us.isa.ppinot.model.MeasureDefinition;
 import es.us.isa.ppinot.model.TimeUnit;
-import es.us.isa.ppinot.model.aggregated.AggregatedMeasure;
 import es.us.isa.ppinot.model.base.CountMeasure;
-import es.us.isa.ppinot.model.base.StateConditionMeasure;
 import es.us.isa.ppinot.model.base.TimeMeasure;
-import es.us.isa.ppinot.model.condition.StateCondition;
 import es.us.isa.ppinot.model.condition.TimeInstantCondition;
 import es.us.isa.ppinot.model.derived.DerivedMultiInstanceMeasure;
 import es.us.isa.ppinot.model.derived.DerivedSingleInstanceMeasure;
@@ -29,110 +25,265 @@ import es.us.isa.ppinot.model.scope.Period;
 import es.us.isa.ppinot.model.scope.SimpleTimeFilter;
 import es.us.isa.ppinot.model.state.GenericState;
 	
-public class CalcPPI {
+public class CalcPPI_PRIPEL {
 	
 	//private static final Schedule WORKINGHOURS = new Schedule(DateTimeConstants.MONDAY, DateTimeConstants.FRIDAY, new LocalTime())
 	
-	//create PPI's based of real life log
+	//create PPI's based on privatized PRIPEL logs (using epsilon=0.1 and p=20)
 	public static void main(String[] args) throws Exception {
-		CalcPPI app = new CalcPPI();
-		List<Measure> measures = null;
+		CalcPPI_PRIPEL app = new CalcPPI_PRIPEL();
+		List<Measure> pripelMeasures = null;
+		List<Measure> pappiMeasures = null;
 		List<Measure> trueMeasures = null;
 		
-		int repetitions = 100;
-	    BufferedWriter writer = new BufferedWriter(new FileWriter("evaluation_sepsis.csv"));
-	    writer.write("Kpi;From;To;NoOfValues;Result;Orig\n");
-		
+		int repetitions = 10;
+	    BufferedWriter writer = new BufferedWriter(new FileWriter("evaluation_sepsis_PRIPELDELEEEEETE.csv"));
+	    writer.write("Kpi;From;To;Algorithm;NoOfValues;Result;Orig\n");
+		LogProvider log = null;
+
+		MXMLLog sepsisLog = new MXMLLog(new FileInputStream(new File(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml"))),null);
+
 		//avg waiting time until admission
-		LogProvider log = new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null);
-	    trueMeasures = app.computePPI(new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null), app.buildAvgWaitingTimeUntilAdmissionNoPrivacy());
-		for(int i=0;i<repetitions;i++) {
+	    trueMeasures = app.computePPI(sepsisLog, app.buildAvgWaitingTimeUntilAdmissionNoPrivacy());
+		for(int i=1;i<=repetitions;i++) {
 			System.out.println("Evaluating KPI 1 - Repetition "+i);
-			log = new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null);
-			measures = app.computePPI(log, app.buildAvgWaitingTimeUntilAdmission());
-			writeMeasuresToFile("AvgWaitingTimeUntilAdmission",measures,trueMeasures,repetitions, writer);
-		}
-		
-		//avg length of stay
-	    trueMeasures = app.computePPI(new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null), app.buildAvgLengthOfStayNoPrivacy());
-		for(int i=0;i<repetitions;i++) {
-			System.out.println("Evaluating KPI 2 - Repetition "+i);
-			log = new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null);
-			measures = app.computePPI(log, app.buildAvgLengthOfStay());
-			writeMeasuresToFile("AvgLengthOfStay",measures,trueMeasures,repetitions, writer);
-		}
-		
-		//max length of stay
-	    trueMeasures = app.computePPI(new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null), app.buildMaxLengthOfStayNoPrivacy());
-		for(int i=0;i<repetitions;i++) {
-			System.out.println("Evaluating KPI 3 - Repetition "+i);
-			log = new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null);
-			measures = app.computePPI(log, app.buildMaxLengthOfStay());
-			writeMeasuresToFile("MaxLengthOfStay",measures,trueMeasures,repetitions, writer);
-		}
-		
-		
-		//sum of patients that returned to er
-		trueMeasures = app.computePPI(new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null), app.buildNoOfERReturnsNoPrivacy());
-		for(int i=0;i<repetitions;i++) {
-			System.out.println("Evaluating KPI 4 - Repetition "+i);
-			log = new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null);
-			measures = app.computePPI(log, app.buildNoOfERReturns());
-			writeMeasuresToFile("PercentageOfReturningPatients",measures,trueMeasures,repetitions, writer);
-		}
-		
-		//no of cases where antibiotics were given in one hour
-		trueMeasures = app.computePPI(new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null), app.buildTimeUntilAntibioticsNoPrivacy());
-		for(int i=0;i<repetitions;i++) {
-			System.out.println("Evaluating KPI 5 - Repetition "+i);
-			log = new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null);
-			measures = app.computePPI(log, app.buildTimeUntilAntibiotics());
-			writeMeasuresToFile("%AntibioticsWithinOneHour",measures,trueMeasures,repetitions, writer);
-		}
-		
-		// percentage of cases where lactic acid check was done in one hour
-		trueMeasures = app.computePPI(new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null), app.buildTimeUntilLacticAcidNoPrivacy());
-		for(int i=0;i<repetitions;i++) {
-			System.out.println("Evaluating KPI 6 - Repetition "+i);
-			log = new MXMLLog(new FileInputStream(new File("Sepsis_Cases.mxml")),null);
-			measures = app.computePPI(log, app.buildTimeUntilLacticAcid());
+			sepsisLog = new MXMLLog(new FileInputStream(new File(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml"))),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildAvgWaitingTimeUntilAdmission());
 			
-			writeMeasuresToFile("%LacticAcidWithinThreeHours",measures,trueMeasures,repetitions, writer);
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);
+			pripelMeasures = app.computePPI(log, app.buildAvgWaitingTimeUntilAdmissionNoPrivacy());
+			writeMeasuresToFile("AvgWaitingTimeUntilAdmission",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+			//pripelStream.close();
+		}
+		//avg length of stay
+		sepsisLog = new MXMLLog(new FileInputStream(new File(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml"))),null);
+	    trueMeasures = app.computePPI(sepsisLog, app.buildAvgLengthOfStayNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 2 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(new File(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml"))),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildAvgLengthOfStay());
+			
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);			
+			pripelMeasures = app.computePPI(log, app.buildAvgLengthOfStayNoPrivacy());
+			writeMeasuresToFile("AvgLengthOfStay",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
 		}
 
-		/*
-		System.out.println(measures.size());
-		for (Measure m : measures) {
-			if(m.getValueAsString()!="NaN") {
-				System.out.println("Value: " + m.getValue());
-	        	//System.out.println("Number of instances: " + m.getInstances().size());
-	        	//System.out.println("Instances: " + m.getInstances());
-	        	//if (m.getMeasureScope() instanceof TemporalMeasureScope) {
-	        		//TemporalMeasureScope tempScope = (TemporalMeasureScope) m.getMeasureScope();
-	        		//System.out.println("Start: " + tempScope.getStart().toString());
-	        		//System.out.println("End: " + tempScope.getEnd().toString());
-	        	//}
-	        	//System.out.println("--");
-			}
-		}*/
+		//max length of stay
+		sepsisLog = new MXMLLog(new FileInputStream(new File(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml"))),null);
+	    trueMeasures = app.computePPI(sepsisLog, app.buildMaxLengthOfStayNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 3 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(new File(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml"))),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildMaxLengthOfStay());
+			
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);		
+			pripelMeasures = app.computePPI(log, app.buildMaxLengthOfStayNoPrivacy());
+			writeMeasuresToFile("MaxLengthOfStay",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}
+
+		//Fraction of patients that returned to er - total not privatized
+		sepsisLog = new MXMLLog(new FileInputStream(new File(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml"))),null);
+		trueMeasures = app.computePPI(sepsisLog, app.buildNoOfERReturnsNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 4.1 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(new File(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml"))),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildNoOfERReturns(false, false));
+
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);
+			pripelMeasures = app.computePPI(log, app.buildNoOfERReturnsNoPrivacy());
+			writeMeasuresToFile("%ReturningPatientsTotalNotPrivatized",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}
+		
+		//total privatized
+		sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+		trueMeasures = app.computePPI(sepsisLog, app.buildNoOfERReturnsNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 4.2 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildNoOfERReturns(true, false));
+
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);
+			pripelMeasures = app.computePPI(log, app.buildNoOfERReturnsNoPrivacy());
+			writeMeasuresToFile("%ReturningPatientsTotalPrivatized",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}
+		
+		//sample-and-aggregate
+		sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+		trueMeasures = app.computePPI(sepsisLog, app.buildNoOfERReturnsNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 4.3 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildNoOfERReturns(false, true));
+
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);
+			pripelMeasures = app.computePPI(log, app.buildNoOfERReturnsNoPrivacy());
+			writeMeasuresToFile("%ReturningPatientsSampleAggregate",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}	
+
+		//Fraction of cases where antibiotics were given in one hour
+		sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+		trueMeasures = app.computePPI(sepsisLog, app.buildTimeUntilAntibioticsNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 5.1 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildTimeUntilAntibiotics(false, false));
+			
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);		
+			pripelMeasures = app.computePPI(log, app.buildTimeUntilAntibioticsNoPrivacy());
+			writeMeasuresToFile("%AntibioticsWithinOneHourTotalNotPrivatized",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}
+		
+		sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+		trueMeasures = app.computePPI(sepsisLog, app.buildTimeUntilAntibioticsNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 5.2 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildTimeUntilAntibiotics(true, false));
+			
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);		
+			pripelMeasures = app.computePPI(log, app.buildTimeUntilAntibioticsNoPrivacy());
+			writeMeasuresToFile("%AntibioticsWithinOneHourTotalPrivatized",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}
+		
+		sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+		trueMeasures = app.computePPI(sepsisLog, app.buildTimeUntilAntibioticsNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 5.3 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildTimeUntilAntibiotics(false, true));
+			
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);		
+			pripelMeasures = app.computePPI(log, app.buildTimeUntilAntibioticsNoPrivacy());
+			writeMeasuresToFile("%AntibioticsWithinOneHourSampleAggregate",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}
+		
+		//Fraction of cases where lactic acid check was done in one hour
+		sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+		trueMeasures = app.computePPI(sepsisLog, app.buildTimeUntilLacticAcidNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 6.1 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildTimeUntilLacticAcid(false, false));
+
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);		
+			pripelMeasures = app.computePPI(log, app.buildTimeUntilLacticAcidNoPrivacy());
+			writeMeasuresToFile("%LacticAcidWithinThreeHoursTotalNotPrivatized",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}
+		
+		sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+		trueMeasures = app.computePPI(sepsisLog, app.buildTimeUntilLacticAcidNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 6.2 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildTimeUntilLacticAcid(true, false));
+
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);		
+			pripelMeasures = app.computePPI(log, app.buildTimeUntilLacticAcidNoPrivacy());
+			writeMeasuresToFile("%LacticAcidWithinThreeHoursTotalPrivatized",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}
+		
+		sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+		trueMeasures = app.computePPI(sepsisLog, app.buildTimeUntilLacticAcidNoPrivacy());
+		for(int i=1;i<repetitions;i++) {
+			System.out.println("Evaluating KPI 6.3 - Repetition "+i);
+			sepsisLog = new MXMLLog(new FileInputStream(String.join(File.separator,"input","Sepsis Cases - Event Log.mxml")),null);
+			pappiMeasures = app.computePPI(sepsisLog, app.buildTimeUntilLacticAcid(false, true));
+
+			log = new MXMLLog(new FileInputStream(new File(String.join(File.separator, "input", "Sepsis_epsilon_0.1_P20_anonymizied_"+i+".mxml"))),null);		
+			pripelMeasures = app.computePPI(log, app.buildTimeUntilLacticAcidNoPrivacy());
+			writeMeasuresToFile("%LacticAcidWithinThreeHoursSampleAggregate",pappiMeasures ,pripelMeasures,trueMeasures,repetitions, writer);
+		}
 		writer.close();
 	}
 
-	private static void writeMeasuresToFile(String kpi, List<Measure> measures, List<Measure> trueMeasures,
+
+	private static void writeMeasuresToFile(String kpi, List<Measure> pappiMeasures, List<Measure> priepelMeasures, List<Measure> trueMeasures,
 			int repetitions, BufferedWriter writer) throws IOException {
-		for(int j=0;j<measures.size();j++) {
-			if(measures.get(j).getValue()!=Double.NaN) {
-				TemporalMeasureScope tempScope = (TemporalMeasureScope) measures.get(j).getMeasureScope();
-				writer.write(String.join(";",
-						kpi,
-						tempScope.getStart().toString(),
-						tempScope.getEnd().toString(),
-						Integer.toString(measures.get(j).getInstances().size()),
-						Double.toString(measures.get(j).getValue()),
-						Double.toString(trueMeasures.get(j).getValue())
-						));
-				writer.write("\n");
+		//System.out.println(pappiMeasures);
+		//add all time scopes from the measures
+		List<TemporalMeasureScope> timeScopes = new ArrayList<TemporalMeasureScope>();
+		pappiMeasures.stream().forEach(x -> timeScopes.add((TemporalMeasureScope)x.getMeasureScope()));
+		//priepelMeasures.stream().forEach(x -> timeScopes.add((TemporalMeasureScope)x.getMeasureScope()));
+		trueMeasures.stream().forEach(x -> timeScopes.add((TemporalMeasureScope)x.getMeasureScope()));
+		
+		//order timescopes and remove duplicates
+		List<TemporalMeasureScope> orderedTimeScopes = timeScopes.stream().collect(Collectors.toList());
+		orderedTimeScopes.sort((a, b) -> a.getStart().compareTo(b.getStart()));
+		for (int i=orderedTimeScopes.size()-1;i>0 ;i--) {
+			TemporalMeasureScope m = orderedTimeScopes.get(i);
+			TemporalMeasureScope prior = orderedTimeScopes.get(i-1);
+			if (m.getStart().equals(prior.getStart()) && m.getEnd().equals(prior.getEnd())) {
+				orderedTimeScopes.remove(i);
 			}
+		}
+		//orderedTimeScopes.stream().forEach(x -> System.out.println(x.getStart()+" "+x.getEnd()));
+		
+		//for each timescope, get data from measures and/or trueMeasures
+		for(TemporalMeasureScope t : orderedTimeScopes) {
+			
+			//use Double for explicit modelling of NaN
+			Double pappiMeasureSize = Double.NaN;
+			Double pappiMeasureValue = Double.NaN;
+			
+			Double priepelMeasureSize = Double.NaN;
+			Double priepelMeasureValue = Double.NaN;
+			
+			Double trueMeasureValue = Double.NaN;
+			//System.out.println(t.getStart()+" -> "+t.getEnd());
+			
+			for(Measure m : pappiMeasures) {
+				if (((TemporalMeasureScope)m.getMeasureScope()).getStart().equals(t.getStart()) && ((TemporalMeasureScope)m.getMeasureScope()).getEnd().equals(t.getEnd())) {
+					if (!new Double(m.getValue()).isNaN()) {
+						//System.out.println("Pappi: " + m.getValue());
+						pappiMeasureSize = (double)m.getInstances().size();
+						pappiMeasureValue = m.getValue();
+						//System.out.println(pappiMeasureSize);
+						break;
+					}
+				}
+			}			
+			for(Measure m : priepelMeasures) {
+				if (((TemporalMeasureScope)m.getMeasureScope()).getStart().equals(t.getStart()) && ((TemporalMeasureScope)m.getMeasureScope()).getEnd().equals(t.getEnd())) {
+					if (!new Double(m.getValue()).isNaN()) {
+						//System.out.println("Priepel: "+m.getValue());
+						priepelMeasureSize = (double)m.getInstances().size();
+						priepelMeasureValue = m.getValue();
+						break;
+					}
+				}
+			}
+			for(Measure m : trueMeasures) {
+				if (((TemporalMeasureScope)m.getMeasureScope()).getStart().equals(t.getStart()) && ((TemporalMeasureScope)m.getMeasureScope()).getEnd().equals(t.getEnd())) {
+					if (!new Double(m.getValue()).isNaN()) {
+					//System.out.println("Original: "+m.getValue());
+					trueMeasureValue = m.getValue();
+					break;
+					}
+				}
+			}
+
+			
+			//write data into file
+			writer.write(String.join(";",
+					kpi,
+					t.getStart().toString(),
+					t.getEnd().toString(),
+					"PaPPI",
+					pappiMeasureSize.isNaN()?"NaN":pappiMeasureSize.toString(),
+					pappiMeasureValue.isNaN()?"NaN":pappiMeasureValue.toString(),
+					trueMeasureValue.isNaN()?"NaN":trueMeasureValue.toString()
+					));
+			writer.write("\n");
+			writer.write(String.join(";",
+					kpi,
+					t.getStart().toString(),
+					t.getEnd().toString(),
+					"Priepel",
+					priepelMeasureSize.isNaN()?"NaN":priepelMeasureSize.toString(),
+					priepelMeasureValue.isNaN()?"NaN":priepelMeasureValue.toString(),
+					trueMeasureValue.isNaN()?"NaN":trueMeasureValue.toString()
+					));
+			writer.write("\n");
 		}
 	}
 
@@ -169,7 +320,7 @@ public class CalcPPI {
 	private MeasureDefinition buildAvgLengthOfStay() {
 		TimeMeasure cycleTime=new TimeMeasure();
 		cycleTime.setFrom(new TimeInstantCondition("Admission NC", GenericState.END));
-		cycleTime.setTo(new TimeInstantCondition("Release", GenericState.END));
+		cycleTime.setTo(new TimeInstantCondition("Release A", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.DAYS);
 		
 		PrivacyAwareAggregatedMeasure avgWaitingTime = new PrivacyAwareAggregatedMeasure();	
@@ -190,7 +341,7 @@ public class CalcPPI {
 	private MeasureDefinition buildMaxLengthOfStay() {
 		TimeMeasure cycleTime=new TimeMeasure();
 		cycleTime.setFrom(new TimeInstantCondition("Admission NC", GenericState.END));
-		cycleTime.setTo(new TimeInstantCondition("Release", GenericState.END));
+		cycleTime.setTo(new TimeInstantCondition("Release A", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.DAYS);
 		
 		PrivacyAwareAggregatedMeasure avgWaitingTime = new PrivacyAwareAggregatedMeasure();	
@@ -207,26 +358,24 @@ public class CalcPPI {
 		return avgWaitingTime;
 	}
 	
-	
-	private MeasureDefinition buildNoOfERReturns() {
+	private MeasureDefinition buildNoOfERReturns(boolean privatizeTotal, boolean aggregate) {
 		CountMeasure instanceCount=new CountMeasure();
 		instanceCount.setId("instances");
-		instanceCount.setWhen(new TimeInstantCondition("START",GenericState.END));
+		instanceCount.setWhen(new TimeInstantCondition("Release A",GenericState.END));
 		
 		PrivacyAwareAggregatedMeasure totalCases = new PrivacyAwareAggregatedMeasure();
-		totalCases.setBaseMeasure(instanceCount);
 		totalCases.setEpsilon(0.1);
-		totalCases.setLowerBounds(0);
-		totalCases.setUpperBound(150);
 		totalCases.setBaseMeasure(instanceCount);
-		totalCases.setTarget(5);
-		totalCases.setFalloff(2);
 		totalCases.setBoundaryEstimation(BoundaryEstimator.MINMAX);
 		totalCases.setMinimalSize(50);
-		totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM);
+		if(privatizeTotal)
+			totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM_LAP);
+		else
+			totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM);
+			
 		
 		TimeMeasure returnTime=new TimeMeasure();
-		returnTime.setFrom(new TimeInstantCondition("Release", GenericState.END));
+		returnTime.setFrom(new TimeInstantCondition("Release A", GenericState.END));
 		returnTime.setTo(new TimeInstantCondition("Return ER", GenericState.END));
 		returnTime.setUnitOfMeasure(TimeUnit.DAYS);
 		
@@ -244,11 +393,14 @@ public class CalcPPI {
 		noOfReturnedPatients.setBoundaryEstimation(BoundaryEstimator.MINMAX);
 		noOfReturnedPatients.setMinimalSize(50);
 		noOfReturnedPatients.setExtensionFactor(1.2);
-		noOfReturnedPatients.setAggregationFunction(PrivacyAwareAggregator.SUM);
+		if(aggregate)
+			noOfReturnedPatients.setAggregationFunction(PrivacyAwareAggregator.SUM);
+		else
+			noOfReturnedPatients.setAggregationFunction(PrivacyAwareAggregator.SUM_LAP);
 		
 		DerivedMultiInstanceMeasure percentage = new DerivedMultiInstanceMeasure();
 
-		percentage.setFunction("a/b*100");
+		percentage.setFunction("System.out.println(Math.min(a,b)+\" \"+b);(Math.min(a,b)/b)*100.0");
 		percentage.addUsedMeasure("a", noOfReturnedPatients);
 		percentage.addUsedMeasure("b", totalCases);
 		
@@ -265,14 +417,16 @@ public class CalcPPI {
 		perc.setExtensionFactor(1.2);
 		perc.setAggregationFunction(PrivacyAwareAggregator.PERCENTAGE);
 		
-		return perc;
-
+		if(aggregate)
+			return perc;
+		else
+			return percentage;
 	}
 	
-	private MeasureDefinition buildTimeUntilAntibiotics() {
+	private MeasureDefinition buildTimeUntilAntibiotics(boolean privatizeTotal, boolean aggregate) {
 		CountMeasure instanceCount=new CountMeasure();
 		instanceCount.setId("instances");
-		instanceCount.setWhen(new TimeInstantCondition("START",GenericState.END));
+		instanceCount.setWhen(new TimeInstantCondition("Start",GenericState.END));
 		
 		PrivacyAwareAggregatedMeasure totalCases = new PrivacyAwareAggregatedMeasure();
 		totalCases.setBaseMeasure(instanceCount);
@@ -284,10 +438,13 @@ public class CalcPPI {
 		totalCases.setFalloff(2);
 		totalCases.setBoundaryEstimation(BoundaryEstimator.MINMAX);
 		totalCases.setMinimalSize(50);
-		totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM);
+		if(privatizeTotal)
+			totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM_LAP);
+		else
+			totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM);
 		
 		TimeMeasure cycleTime=new TimeMeasure();
-		cycleTime.setFrom(new TimeInstantCondition("START", GenericState.END));
+		cycleTime.setFrom(new TimeInstantCondition("Start", GenericState.END));
 		cycleTime.setTo(new TimeInstantCondition("IV Antibiotics", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.MINUTES);
 		
@@ -306,10 +463,13 @@ public class CalcPPI {
 		avgWaitingTime.setBoundaryEstimation(BoundaryEstimator.MINMAX);
 		avgWaitingTime.setMinimalSize(50);
 		avgWaitingTime.setExtensionFactor(1.2);
-		avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.SUM_AGGREGATE);
+		if(aggregate)
+			avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.SUM);
+		else
+			avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.SUM_LAP);
 		
 		DerivedMultiInstanceMeasure percentage = new DerivedMultiInstanceMeasure();
-		percentage.setFunction("a/b*100");
+		percentage.setFunction("System.out.println(Math.min(a,b)+\" \"+b);(Math.min(a,b)/b)*100.0");
 		percentage.addUsedMeasure("a", avgWaitingTime);
 		percentage.addUsedMeasure("b", totalCases);
 		
@@ -325,14 +485,16 @@ public class CalcPPI {
 		perc.setMinimalSize(50);
 		perc.setExtensionFactor(1.2);
 		perc.setAggregationFunction(PrivacyAwareAggregator.PERCENTAGE);
-		
-		return perc;
+		if(aggregate)
+			return perc;
+		else
+			return percentage;
 	}
 	
-	private MeasureDefinition buildTimeUntilLacticAcid() {
+	private MeasureDefinition buildTimeUntilLacticAcid(boolean privatizeTotal, boolean aggregate) {
 		CountMeasure instanceCount=new CountMeasure();
 		instanceCount.setId("instances");
-		instanceCount.setWhen(new TimeInstantCondition("START",GenericState.END));
+		instanceCount.setWhen(new TimeInstantCondition("Start",GenericState.END));
 		PrivacyAwareAggregatedMeasure totalCases = new PrivacyAwareAggregatedMeasure();
 		totalCases.setBaseMeasure(instanceCount);
 		totalCases.setEpsilon(0.1);
@@ -343,10 +505,13 @@ public class CalcPPI {
 		totalCases.setFalloff(2);
 		totalCases.setBoundaryEstimation(BoundaryEstimator.MINMAX);
 		totalCases.setMinimalSize(50);
-		totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM);
+		if(privatizeTotal)
+			totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM_LAP);
+		else
+			totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM);
 		
 		TimeMeasure cycleTime=new TimeMeasure();
-		cycleTime.setFrom(new TimeInstantCondition("START", GenericState.END));
+		cycleTime.setFrom(new TimeInstantCondition("Start", GenericState.END));
 		cycleTime.setTo(new TimeInstantCondition("LacticAcid", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.MINUTES);
 		
@@ -366,11 +531,14 @@ public class CalcPPI {
 		avgWaitingTime.setBoundaryEstimation(BoundaryEstimator.MINMAX);
 		avgWaitingTime.setMinimalSize(50);
 		avgWaitingTime.setExtensionFactor(1.2);
-		avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.SUM_AGGREGATE);
+		if(aggregate)
+			avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.SUM);
+		else
+			avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.SUM_LAP);
 		
 		DerivedMultiInstanceMeasure percentage = new DerivedMultiInstanceMeasure();
 		percentage.setId("percentage");
-		percentage.setFunction("a/b*100");
+		percentage.setFunction("System.out.println(Math.min(a,b)+\" \"+b);(Math.min(a,b)/b)*100.0");
 		percentage.addUsedMeasure("a", avgWaitingTime);
 		percentage.addUsedMeasure("b", totalCases);
 		
@@ -388,8 +556,10 @@ public class CalcPPI {
 		perc.setExtensionFactor(1.2);
 		perc.setAggregationFunction(PrivacyAwareAggregator.PERCENTAGE);
 		
-		return perc;
-		//return percentage;
+		if(aggregate)
+			return perc;
+		else
+			return percentage;
 	}
 	
 	
@@ -410,7 +580,8 @@ public class CalcPPI {
 		avgWaitingTime.setBoundaryEstimation(BoundaryEstimator.MINMAX);
 		avgWaitingTime.setMinimalSize(0);
 		avgWaitingTime.setExtensionFactor(1.2);
-		avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.AVG);
+		avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.AVG);	
+		
 		return avgWaitingTime;
 	}
 	
@@ -418,7 +589,7 @@ public class CalcPPI {
 	private MeasureDefinition buildAvgLengthOfStayNoPrivacy() {
 		TimeMeasure cycleTime=new TimeMeasure();
 		cycleTime.setFrom(new TimeInstantCondition("Admission NC", GenericState.END));
-		cycleTime.setTo(new TimeInstantCondition("Release", GenericState.END));
+		cycleTime.setTo(new TimeInstantCondition("Release A", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.DAYS);
 		
 		PrivacyAwareAggregatedMeasure avgWaitingTime = new PrivacyAwareAggregatedMeasure();	
@@ -439,7 +610,7 @@ public class CalcPPI {
 	private MeasureDefinition buildMaxLengthOfStayNoPrivacy() {
 		TimeMeasure cycleTime=new TimeMeasure();
 		cycleTime.setFrom(new TimeInstantCondition("Admission NC", GenericState.END));
-		cycleTime.setTo(new TimeInstantCondition("Release", GenericState.END));
+		cycleTime.setTo(new TimeInstantCondition("Release A", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.DAYS);
 		
 		PrivacyAwareAggregatedMeasure avgWaitingTime = new PrivacyAwareAggregatedMeasure();	
@@ -460,7 +631,7 @@ public class CalcPPI {
 	private MeasureDefinition buildNoOfERReturnsNoPrivacy() {
 		CountMeasure instanceCount=new CountMeasure();
 		instanceCount.setId("instances");
-		instanceCount.setWhen(new TimeInstantCondition("START",GenericState.END));
+		instanceCount.setWhen(new TimeInstantCondition("Release A",GenericState.END));
 		
 		PrivacyAwareAggregatedMeasure totalCases = new PrivacyAwareAggregatedMeasure();
 		totalCases.setBaseMeasure(instanceCount);
@@ -475,7 +646,7 @@ public class CalcPPI {
 		totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM);
 		
 		TimeMeasure returnTime=new TimeMeasure();
-		returnTime.setFrom(new TimeInstantCondition("Release", GenericState.END));
+		returnTime.setFrom(new TimeInstantCondition("Release A", GenericState.END));
 		returnTime.setTo(new TimeInstantCondition("Return ER", GenericState.END));
 		returnTime.setUnitOfMeasure(TimeUnit.DAYS);
 		
@@ -495,17 +666,19 @@ public class CalcPPI {
 		noOfReturnedPatients.setExtensionFactor(1.2);
 		noOfReturnedPatients.setAggregationFunction(PrivacyAwareAggregator.SUM);
 		
+		
 		DerivedMultiInstanceMeasure percentage = new DerivedMultiInstanceMeasure();
 		percentage.setFunction("a/b*100");
 		percentage.addUsedMeasure("a", noOfReturnedPatients);
 		percentage.addUsedMeasure("b", totalCases);
-		return noOfReturnedPatients;
+		return percentage;
+		//return noOfReturnedPatients;
 	}
 	
 	private MeasureDefinition buildTimeUntilAntibioticsNoPrivacy() {
 		CountMeasure instanceCount=new CountMeasure();
 		instanceCount.setId("instances");
-		instanceCount.setWhen(new TimeInstantCondition("START",GenericState.END));
+		instanceCount.setWhen(new TimeInstantCondition("Start",GenericState.END));
 		
 		PrivacyAwareAggregatedMeasure totalCases = new PrivacyAwareAggregatedMeasure();
 		totalCases.setBaseMeasure(instanceCount);
@@ -520,7 +693,7 @@ public class CalcPPI {
 		totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM);
 		
 		TimeMeasure cycleTime=new TimeMeasure();
-		cycleTime.setFrom(new TimeInstantCondition("START", GenericState.END));
+		cycleTime.setFrom(new TimeInstantCondition("Start", GenericState.END));
 		cycleTime.setTo(new TimeInstantCondition("IV Antibiotics", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.MINUTES);
 		
@@ -551,7 +724,7 @@ public class CalcPPI {
 	private MeasureDefinition buildTimeUntilLacticAcidNoPrivacy() {
 		CountMeasure instanceCount=new CountMeasure();
 		instanceCount.setId("instances");
-		instanceCount.setWhen(new TimeInstantCondition("START",GenericState.END));
+		instanceCount.setWhen(new TimeInstantCondition("Start",GenericState.END));
 		PrivacyAwareAggregatedMeasure totalCases = new PrivacyAwareAggregatedMeasure();
 		totalCases.setBaseMeasure(instanceCount);
 		totalCases.setEpsilon(0.1);
@@ -565,7 +738,7 @@ public class CalcPPI {
 		totalCases.setAggregationFunction(PrivacyAwareAggregator.SUM);
 		
 		TimeMeasure cycleTime=new TimeMeasure();
-		cycleTime.setFrom(new TimeInstantCondition("START", GenericState.END));
+		cycleTime.setFrom(new TimeInstantCondition("Start", GenericState.END));
 		cycleTime.setTo(new TimeInstantCondition("LacticAcid", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.MINUTES);
 		
@@ -594,9 +767,4 @@ public class CalcPPI {
 		percentage.addUsedMeasure("b", totalCases);
 		return percentage;
 	}
-	
-	
-	
-	
-	
 }
