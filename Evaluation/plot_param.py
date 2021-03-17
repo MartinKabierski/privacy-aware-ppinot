@@ -86,7 +86,7 @@ def plot_target_value_impact(data):
                 color="lightblue",ax=axes[3])
     axes[3].set_title('Max')
     labels = [item.get_text() for item in axes[3].get_xticklabels()]
-    labels = ['w/o','Y-10','Y+10']
+    labels = ['w/o','-10','+10']
     axes[3].set_xticklabels(labels)
     axes[3].set_ylim(0,200)
 
@@ -128,7 +128,7 @@ def plot_falloff_factor_impact(data):
                 color="lightblue",ax=axes[0])
     axes[0].set_title('Mean')
     labels = [item.get_text() for item in axes[0].get_xticklabels()]
-    labels = ['w/o','1','5','10','20']
+    labels = ['1','5','10','20']
     axes[0].set_xticklabels(labels)
     axes[0].set_ylim(0,200)
 
@@ -139,7 +139,7 @@ def plot_falloff_factor_impact(data):
                 color="lightblue",ax=axes[1])
     axes[1].set_title('Sum')
     labels = [item.get_text() for item in axes[1].get_xticklabels()]
-    labels = ['w/o','1','5','10','20']
+    labels = ['1','5','10','20']
     axes[1].set_xticklabels(labels)
     axes[1].set_ylim(0,40000)
 
@@ -149,7 +149,7 @@ def plot_falloff_factor_impact(data):
                 color="lightblue",ax=axes[2])
     axes[2].set_title('Min')
     labels = [item.get_text() for item in axes[2].get_xticklabels()]
-    labels = ['w/o','1','5','10','20']
+    labels = ['1','5','10','20']
     axes[2].set_xticklabels(labels)
     axes[2].set_ylim(0,200)
 
@@ -159,7 +159,7 @@ def plot_falloff_factor_impact(data):
                 color="lightblue",ax=axes[3])
     axes[3].set_title('Max')
     labels = [item.get_text() for item in axes[3].get_xticklabels()]
-    labels = ['w/o','1','5','10','20']
+    labels = ['1','5','10','20']
     axes[3].set_xticklabels(labels)
     axes[3].set_ylim(0,200)
 

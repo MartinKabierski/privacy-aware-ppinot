@@ -19,8 +19,6 @@ public class AggregationEvaluation {
 	public static String PARETO = "pareto";
 	public String POISSON = "poisson";
 	
-	//TODO add evaluation cases
-	//TODO write into file 
 	public static void main(String[] args) throws IOException {
 
 		
@@ -106,24 +104,6 @@ public class AggregationEvaluation {
 				BoundaryEstimator.MINMAX,
 				BoundaryEstimator.EXTEND
 		};
-		//average mechanisms
-		List<Double>test= new ArrayList<Double>(distributions.get(1).samples);
-		//aggregator.aggregate(test, PrivacyAwareAggregator.MIN_EXP		  , BoundaryEstimator.EXTEND, 0.1, 800.0, 1, 1.2, 10);
-		/*System.out.println();
-		aggregator.aggregate(test, PrivacyAwareAggregator.MIN_EXP_FALLOFF, BoundaryEstimator.EXTEND, 0.1, -100, 1, 1.2, 10);		System.out.println();
-
-		aggregator.aggregate(test, PrivacyAwareAggregator.MIN_EXP_FALLOFF, BoundaryEstimator.EXTEND, 0.1, -100, 5, 1.2, 10);		System.out.println();
-		
-		aggregator.aggregate(test, PrivacyAwareAggregator.MIN_EXP_FALLOFF, BoundaryEstimator.EXTEND, 0.1, 30, 1, 1.2, 10);			System.out.println();
-
-		aggregator.aggregate(test, PrivacyAwareAggregator.MIN_EXP_FALLOFF, BoundaryEstimator.EXTEND, 0.1, 30, 5, 1.2, 10);			System.out.println();
-
-		aggregator.aggregate(test, PrivacyAwareAggregator.MIN_EXP_FALLOFF, BoundaryEstimator.EXTEND, 0.1, 30, 10, 1.2, 10);
-
-
-		//aggregator.aggregate(test, PrivacyAwareAggregator.SUM_EXP_FALLOFF, BoundaryEstimator.EXTEND, 0.1, 800.0, 1, 1.2, 10);
-*/
-
 		
 		
 		for (EvaluationDistribution dist : distributions) {
@@ -186,6 +166,7 @@ public class AggregationEvaluation {
 				}
 			}
 		}
+		
 		
 		Collection<Double> values =distributions.get(0).samples;
 		Collection<Double> binary =new ArrayList();
@@ -318,6 +299,7 @@ public class AggregationEvaluation {
 		}
 		
 		writer.close();
+		
 	}
 	
 	public static List<EvaluationDistribution> buildSamples(String function){

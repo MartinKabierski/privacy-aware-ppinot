@@ -43,21 +43,21 @@ def main():
     print("PPI 3")
     plot_ppi(data, 'MaxLengthOfStay', 'PPI 3: Maximum length of stay', 'Month', 'Time (days)', "plots/ppi3.pdf", True)
 
-    print("PPI 4.1")
+    print("PPI 4.1")#used for paper
     plot_ppi(data, '%ReturningPatientsTotalNotPrivatized', 'PPI 4: % returning patients', 'Month', 'Percentage', "plots/ppi41.pdf", True)
     print("PPI 4.2")
     plot_ppi(data, '%ReturningPatientsTotalPrivatized', 'PPI 4: % returning patients', 'Month', 'Percentage', "plots/ppi42.pdf", True)
     print("PPI 4.3")
     plot_ppi(data, '%ReturningPatientsSampleAggregate', 'PPI 4: % returning patients', 'Month', 'Percentage', "plots/ppi43.pdf", True)
 
-    print("PPI 5.1")
+    print("PPI 5.1")#used for paper
     plot_ppi(data, '%AntibioticsWithinOneHourTotalNotPrivatized', 'PPI 5: % patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi51.pdf", True)
     print("PPI 5.2")
     plot_ppi(data, '%AntibioticsWithinOneHourTotalPrivatized', 'PPI 5: % patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi52.pdf", True)
     print("PPI 5.3")
     plot_ppi(data, '%AntibioticsWithinOneHourSampleAggregate', 'PPI 5: % patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi53.pdf", True)
 
-    print("PPI 6.1")
+    print("PPI 6.1")#used for paper
     plot_ppi(data, '%LacticAcidWithinThreeHoursTotalNotPrivatized', 'PPI 6: % patients with lactic acid < 180 min', 'Month', 'Percentage', "plots/ppi61.pdf", True)
     print("PPI 6.2")
     plot_ppi(data, '%LacticAcidWithinThreeHoursTotalPrivatized', 'PPI 6: % patients with lactic acid < 180 min', 'Month', 'Percentage', "plots/ppi62.pdf", True)
