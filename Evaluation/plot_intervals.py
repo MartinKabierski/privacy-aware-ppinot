@@ -15,8 +15,8 @@ def main():
 
     sns.set(font_scale=1.5)
     sns.set_style("ticks")
-    plot_interval_mechanism_scores("interval_scores.pdf")
-    plot_interval_mechanism_scores_preserving("interval_scores_preserving.pdf")
+    plot_interval_mechanism_scores("plots/interval_scores.pdf")
+    plot_interval_mechanism_scores_preserving("plots/interval_scores_preserving.pdf")
 
 
 

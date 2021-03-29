@@ -8,33 +8,6 @@ def main():
     print(data.head())
     sns.set_style("ticks")
     sns.set(font_scale=2)
-    #print("PPI 1")
-    #plot_ppi(data, 'AvgWaitingTimeUntilAdmission', 'PPI 1: Avg waiting time until admission', 'Month', 'Time (min)', "plots/ppi1.pdf", True)
-    #print("PPI 2")
-    #plot_ppi(data, 'AvgLengthOfStay', 'PPI 2: Avg length of stay', 'Month', 'Time (days)', "plots/ppi2.pdf", True)
-    #print("PPI 3")
-    #plot_ppi(data, 'MaxLengthOfStay', 'PPI 3: Maximum length of stay', 'Month', 'Time (days)', "plots/ppi3.pdf", True)
-
-    #print("PPI 4.1")
-    #plot_ppi(data, '%ReturningPatientsTotalNotPrivatized', 'PPI 4.1: Fraction of returning patients', 'Month', 'Percentage', "plots/ppi41.pdf", True)
-    #print("PPI 4.2")
-    #plot_ppi(data, '%ReturningPatientsTotalPrivatized', 'PPI 4.2: Fraction of returning patients', 'Month', 'Percentage', "plots/ppi42.pdf", True)
-    #print("PPI 4.3")
-    #plot_ppi(data, '%ReturningPatientsSampleAggregate', 'PPI 4.3: Fraction of returning patients', 'Month', 'Percentage', "plots/ppi43.pdf", True)
-
-    #print("PPI 5.1")
-    #plot_ppi(data, '%AntibioticsWithinOneHourTotalNotPrivatized', 'PPI 5.1: Fraction of patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi51.pdf", True)
-    #print("PPI 5.2")
-    #plot_ppi(data, '%AntibioticsWithinOneHourTotalPrivatized', 'PPI 5.2: Fraction of patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi52.pdf", True)
-    #print("PPI 5.3")
-    #plot_ppi(data, '%AntibioticsWithinOneHourSampleAggregate', 'PPI 5.3: Fraction of patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi53.pdf", True)
-
-    #print("PPI 6.1")
-    #plot_ppi(data, '%LacticAcidWithinThreeHoursTotalNotPrivatized', 'PPI 6.1: Fraction of patients with lactic acid < 180 min', 'Month', 'Percentage', "plots/ppi61.pdf", True)
-    #print("PPI 6.2")
-    #plot_ppi(data, '%LacticAcidWithinThreeHoursTotalPrivatized', 'PPI 6.2: Fraction of patients with lactic acid < 180 min', 'Month', 'Percentage', "plots/ppi62.pdf", True)
-    #print("PPI 6.3")
-    #plot_ppi(data, '%LacticAcidWithinThreeHoursSampleAggregate', 'PPI 6.3: Fraction of patients with lactic acid < 180 min', 'Month', 'Percentage', "plots/ppi63.pdf", True)
 
     print("PPI 1")
     plot_ppi(data, 'AvgWaitingTimeUntilAdmission', 'PPI 1: Avg waiting time until admission', 'Month', 'Time (min)', "plots/ppi1.pdf", True)
@@ -235,5 +208,4 @@ def plot_ppi6(data):
 
 
 if __name__ == "__main__":
-    # sys.argv = [sys.argv[0], 'ICC_alignment_approx_FINAL', 'alignment_ORIG_FINAL']
-    main()  # sys.argv)
+    main()
