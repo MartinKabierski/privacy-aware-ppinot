@@ -6,18 +6,18 @@ The project extends the PPINOT definitions by introducing new aggregation measur
 
 
 ## Installation
-Clone the repository and resolve the depencies defined in the pom.xml.
+Clone the repository and resolve the depencies defined in pom.xml.
 After all these dependencies have been resolved you are ready to go.
 
 ## Usage
 The general methodology for defining and evaluating PPIs remains the same as for the original PPINOT packages, so please have a look at those first.
-Furterhmore, the file "CalcPPI.java", that contains the definition and evaluation procedures for multiple privacy-aware PPIs on the basis of the publicly available "Sepsis Cases"-Log file, should give guidance on how to use the newly introduced privacy-protected PPINOT-measures.
+Furthermore, the file "CalcPPI.java", that contains the definition and evaluation procedures for multiple privacy-aware PPIs on the basis of the publicly available "Sepsis Cases"-Log file, should give guidance on how to use add privacy-protection to the definition of PPIs.
 
 ## Evaluation Results
-The result files, figures and scripts used for the creation of those figures, used used thrpughout the paper, can be found in the directory "evaluation".
+The result files, figures and scripts used for the creation of those figures, as used throughout the paper, are in the directory "evaluation".
 
 ## Contact
-martin.bauer@hu-berlin.de
+martin.kabierski@hu-berlin.de
 
 ### License
 We provide our code, under the MIT license.
