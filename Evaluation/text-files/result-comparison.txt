@@ -1,0 +1,55 @@
+
+
+PATIENT RELATED PPI                             BASELINE %          OUR CODE
+--------------------------------------------------------------------------------
+unplanned re-attendance (<72h)                    5.6                 5.14
+left without being seen                           2.6                 2.6
+left before treatment complete                    1.0                 1.1
+left against medical advice                       1.8                 0.7
+admission rate                                    8.0                 8.1
+(SSOU transfer rate)                              9.0                  -
+--------------------------------------------------------------------------------
+
+
+
+PPI for TIME MEASUREMENT                        BASELINE min        OUR CODE
+--------------------------------------------------------------------------------
+length of stay for discharged patients            150.0               149.3*
+length of stay for admitted patients              198.0               197.4
+time to treatment                                  35.0
+radiology interval                                 36.2                58.1**
+laboratory interval                                53.1                85.4**
+(doctor to discharge time)                         36.0                 -
+(doctor to decision to admit time)                 57.3                 -
+--------------------------------------------------------------------------------
+
+* here type_of_dicharge = {admission to hospital, transfer
+  to short observation unit, ...} needs to be omitted or equivalently only con-
+  sider {discharge to home, discharge to outpatient clinic}
+  
+** how exactly are those intervals defined?
+
+
+
+PPI for RESOURCE UTILIZATION                    BASELINE p.P.       OUR CODE
+--------------------------------------------------------------------------------
+number of specialty consultations                 0.58                0.597
+number of CT studies                              0.14                0.135
+number of MRI studies                             0.01                0.001**
+number of plain radiography studies               0.46                0.80*
+number of ultrasonic studies                      0.16                0.162
+number of laboratory studies                      0.53                0.536
+(number of ecg)                                   0.30                 -
+--------------------------------------------------------------------------------
+
+* considering only X-Ray and Echocardiograms yields exactly 0.46 --> plain
+
+** 9.307E-4
+
+
+
+
+
+
+
+
