@@ -1,4 +1,4 @@
-package pappi;
+package pappi.measureDefinitions;
 
 import es.us.isa.ppinot.model.aggregated.AggregatedMeasure;
 

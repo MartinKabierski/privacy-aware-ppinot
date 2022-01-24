@@ -1,4 +1,4 @@
-package pappi;
+package apps;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,6 +11,9 @@ import java.util.Random;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.ParetoDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
+
+import pappi.aggregators.PrivacyAwareAggregator;
+import pappi.boundary.BoundaryEstimator;
 
 
 public class AggregationEvaluation {

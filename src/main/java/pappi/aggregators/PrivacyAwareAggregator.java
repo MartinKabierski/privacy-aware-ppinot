@@ -1,4 +1,4 @@
-package pappi;
+package pappi.aggregators;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +18,8 @@ import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.codehaus.jackson.map.ser.std.StdArraySerializers.ShortArraySerializer;
 
 import es.us.isa.ppinot.evaluation.Aggregator;
+import pappi.boundary.BoundaryEstimator;
+import pappi.boundary.Bounds;
 
 public class PrivacyAwareAggregator extends Aggregator{
 	//TODO Refactor classes
@@ -63,8 +65,11 @@ public class PrivacyAwareAggregator extends Aggregator{
     public static final String MAX_SMOOTH = "Max_smooth";
     public static final String MIN_SMOOTH = "Min_smooth";
     
+    //Derived Measures Hack
     public static final String PERCENTAGE = "Percentage";
 
+    //Simply Merge all inputs
+    public static final String MERGE = "merge";
     
 	private String aggregationFunction;
 
@@ -87,7 +92,7 @@ public class PrivacyAwareAggregator extends Aggregator{
     		) {
     	
     	minimalSize=values.size();
-    	if(values.size()<minimalSize)return Double.NaN;
+    	//if(values.size()<minimalSize)return Double.NaN;
     	
     	double lowerBound;
     	double upperBound;
@@ -103,15 +108,16 @@ public class PrivacyAwareAggregator extends Aggregator{
     	}
     	//else bounds = BoundaryEstimator.estimateBoundsMinMax(values);
     	
-    	lowerBound=bounds.lowerBound;
-    	upperBound=bounds.upperBound;
+    	lowerBound=bounds.getLowerBound();
+    	upperBound=bounds.getUpperBound();
     	//Data Sanitization
     	if (lowerBound<0 && upperBound <0 || lowerBound > upperBound)
     		return Double.NaN;
     	//filter out Nan from set
     	Predicate<Double> nanFilter = x -> !x.isNaN();
-    	values = values.stream().filter(nanFilter).collect(Collectors.toList());
     	
+    	values = values.stream().filter(nanFilter).collect(Collectors.toList());
+
     	//apply aggregation scheme
         double aggregation = Double.NaN;
         if (SUM_LAP.equals(aggregationFunction)) {
@@ -233,7 +239,7 @@ public class PrivacyAwareAggregator extends Aggregator{
 	public double sum_lap(Collection<Double> values, double epsilon, double lowerBound, double upperBound) {
 		double sensitivity = upperBound;
 		//catch corner cases, where all cases have same value or bounds are the same
-		if(sensitivity == 0)return Double.NaN;
+		if(sensitivity == 0)sensitivity=1;
 		
 		LaplaceDistribution laplace = new LaplaceDistribution(0,sensitivity/epsilon);
 		
@@ -639,12 +645,10 @@ public class PrivacyAwareAggregator extends Aggregator{
 		sortedValues.removeIf(x -> x.isNaN());
 		Collections.sort(sortedValues);
 //		sortedValues = sortedValues.stream().distinct().collect(Collectors.toList());
-
-		
 		double sum=sortedValues.stream().reduce(0.0, (a, b)-> a+b);
 		double maxChange=upperBound;
 		if(maxChange==0)maxChange=1;
-		
+
 		List<Interval> intervals = new ArrayList<Interval>();
 		
 		List<Interval> lowerIntervals 	= new ArrayList<Interval>();
@@ -1227,7 +1231,7 @@ public class PrivacyAwareAggregator extends Aggregator{
 		List<Double> sortedValues = new ArrayList<Double>(values);
 		Collections.sort(sortedValues);
 		List<Double[]> partitions =new ArrayList<Double[]>();
-		int noBuckets =(int)Math.ceil(values.size()/20);
+		int noBuckets =50;
 		if(values.size()<noBuckets)noBuckets=values.size();
 		//if(values.size()/2.0>=50.0)
 		//	noBuckets = (int) Math.ceil(values.size()/2.0);
@@ -1262,12 +1266,13 @@ public class PrivacyAwareAggregator extends Aggregator{
 
 		//windsorized mean
 		Arrays.sort(partitionResults);
+		//System.out.println(Arrays.toString(partitionResults));
 		int tenPercent=noBuckets/10;
-		for(int i=0;i<=tenPercent;i++) {
-			partitionResults[i]=partitionResults[tenPercent];
-			partitionResults[partitionResults.length-1-i]=partitionResults[partitionResults.length-1-tenPercent];
-		}
-		sensitivity = (partitionResults[partitionResults.length-1]-partitionResults[0])/noBuckets;
+		//for(int i=0;i<=tenPercent;i++) {
+		//	partitionResults[i]=partitionResults[tenPercent];
+		//	partitionResults[partitionResults.length-1-i]=partitionResults[partitionResults.length-1-tenPercent];
+		//}
+		//sensitivity = (partitionResults[partitionResults.length-1]-partitionResults[0])/noBuckets;
 		//System.out.println(partitionResults[0]+" , "+partitionResults[partitionResults.length-1]);
 		if (noBuckets==1) sensitivity=100.0;
 		//now determine average based on samples

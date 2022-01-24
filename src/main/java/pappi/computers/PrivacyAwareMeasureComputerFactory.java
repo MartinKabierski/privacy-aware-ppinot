@@ -1,5 +1,6 @@
-package pappi;
+package pappi.computers;
 
+import es.us.isa.ppinot.evaluation.computers.AggregatedMeasureComputer;
 import es.us.isa.ppinot.evaluation.computers.CountMeasureComputer;
 import es.us.isa.ppinot.evaluation.computers.DataMeasureComputer;
 import es.us.isa.ppinot.evaluation.computers.DerivedMeasureComputer;
@@ -15,11 +16,13 @@ import es.us.isa.ppinot.model.base.DataMeasure;
 import es.us.isa.ppinot.model.base.StateConditionMeasure;
 import es.us.isa.ppinot.model.base.TimeMeasure;
 import es.us.isa.ppinot.model.derived.DerivedMeasure;
+import pappi.measureDefinitions.PrivacyAwareAggregatedMeasure;
 
 public class PrivacyAwareMeasureComputerFactory extends MeasureComputerFactory{
     public MeasureComputer create(MeasureDefinition definition, ProcessInstanceFilter filter) {
         MeasureComputer computer = null;
 
+        //TODO remove basemeasureComputer, and simply use AggregatedMeasureComputer
         //base measures are kept as they are
         if (definition instanceof TimeMeasure) {
             computer = new TimeMeasureComputer(definition, filter);
@@ -30,10 +33,14 @@ public class PrivacyAwareMeasureComputerFactory extends MeasureComputerFactory{
         } else if (definition instanceof DataMeasure) {
             computer = new DataMeasureComputer(definition);
         
-        } else if (definition instanceof AggregatedMeasure) {
+        } else if (definition instanceof PrivacyAwareAggregatedMeasure) {
             computer = new PrivacyAwareAggregatedMeasureComputer(definition, filter);
         
-        //TODO PrivacyAwareDerivedMeasureComputer
+        //TODO double check if this actually works
+        } else if (definition instanceof AggregatedMeasure) {
+            computer = new AggregatedMeasureComputer(definition, filter);
+            
+        //TODO include PrivacyAwareDerivedMeasureComputer
         } else if (definition instanceof DerivedMeasure) {
             computer = new PrivacyAwareDerivedMeasureComputer(definition, filter);
         }

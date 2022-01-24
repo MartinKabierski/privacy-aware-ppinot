@@ -1,4 +1,4 @@
-package pappi;
+package pappi.boundary;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.mapdb.DBException.VolumeClosedByInterrupt;
+
 
 public class BoundaryEstimator {
 	
@@ -29,61 +30,50 @@ public class BoundaryEstimator {
     }
     
     
-	public static Bounds estimateBoundsMinMax(Collection<Double> values) {
-    	double min=Double.MAX_VALUE;
-    	double max=0;
-		for(Double value : values) {
-    		if(!value.isNaN()) {
-	    		if(value < min) min = value;
-	    		if(value > max) max = value;
-    		}
-    	}
-		if (min==Double.MAX_VALUE && max==0) {
+	/**
+	 * @param values, a collection of doubles
+	 * @return the boundaries of the values as a tuple (min, max)
+	 */
+	public static Bounds estimateBoundsMinMax(Collection<Double> vals) {
+		Bounds minMax = minMax(vals);
+		
+		if (minMax.getLowerBound()==Double.MAX_VALUE && minMax.getUpperBound()==0) {
 			return new Bounds(-1,-1);
 		}
-		return new Bounds(min, max);
+		
+		return minMax;
 	}
 	
 	
 	
-	public static Bounds estimateBoundsFilter(Collection<Double> values) {
-		//int toExtend = (int)Math.ceil((((values.size()*1.1) - values.size())/2.0));
+	public static Bounds estimateBoundsFilter(Collection<Double> vals) {
+    	Bounds minMax = minMax(vals);
+    	double min = minMax.getLowerBound();
+    	double max = minMax.getUpperBound();
 		
-    	double min=Double.MAX_VALUE;
-    	double max=0;
-    	
-		for(Double value : values) {
-    		if(!value.isNaN()) {
-	    		if(value < min) min = value;
-	    		if(value > max) max = value;
-    		}
-    	}
 		double toFilter = ((max-min)*1.2-(max-min))/2.0;
-		double newMax =max-toFilter;
-		double newMin =min+toFilter;
+		double newMin = min + toFilter;
+		double newMax = max - toFilter;
+		minMax.setLowerBound(Math.max(0, newMax));
+		minMax.setUpperBound(newMax);
 		//right now actually decreases set size of input set is used multiple times
 		//TODO do not change original representation
-		values.removeIf(x -> (x>newMax||x<newMin));
+		vals.removeIf(x -> (x>newMax||x<newMin));
 		
 		//allowing negative bounds increases performance for minimum queries if minimum is close to 0
-		return new Bounds(Math.max(0,min+toFilter),max-toFilter);
+		return minMax;
 		//return new Bounds(min-toExtend,max+toExtend);
 	}
 	
 	
 	
-	public static Bounds estimateBoundsExtend(Collection<Double> values, double factor) {
+	public static Bounds estimateBoundsExtend(Collection<Double> vals, double factor) {
 		//int toExtend = (int)Math.ceil((((values.size()*1.1) - values.size())/2.0));
 		
-    	double min=Double.MAX_VALUE;
-    	double max=0;
-    	
-		for(Double value : values) {
-    		if(!value.isNaN()) {
-	    		if(value < min) min = value;
-	    		if(value > max) max = value;
-    		}
-    	}
+		Bounds minMax = minMax(vals);
+    	double min = minMax.getLowerBound();
+    	double max = minMax.getUpperBound();
+		
 		/*List<Double> sortedValues = new ArrayList<Double>(values);
 		Collections.sort(sortedValues);
 		double intervalRange=0;
@@ -95,8 +85,28 @@ public class BoundaryEstimator {
 		System.out.println(intervalRange);
 */
 		double toExtend = ((max-min)*factor-(max-min))/2.0;
+		minMax.setLowerBound(min - toExtend);
+		minMax.setUpperBound(max + toExtend);
 		//allowing negative bounds increases performance for minimum queries if minimum is close to 0
 		//return new Bounds(Math.max(0,min-toExtend),max+toExtend);
-		return new Bounds(min-toExtend,max+toExtend);
+		return minMax;
+	}
+	
+	/**
+	 * @param vals: a list of double values, possibly containing null pointers
+	 * @return the boundaries of the values, i.e. the minimum, maximum as a Bounds object
+	 */
+	public static Bounds minMax(Collection<Double> vals) {
+		double min=Double.MAX_VALUE;
+    	double max=0;
+    	
+		for(Double value : vals) {
+    		if(!value.isNaN()) {
+	    		if(value < min) min = value;
+	    		if(value > max) max = value;
+    		}
+    	}
+		
+		return new Bounds(min, max);
 	}
 }

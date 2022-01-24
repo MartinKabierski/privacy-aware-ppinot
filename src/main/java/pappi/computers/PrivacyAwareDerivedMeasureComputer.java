@@ -1,4 +1,4 @@
-package pappi;
+package pappi.computers;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -19,7 +19,9 @@ import es.us.isa.ppinot.model.MeasureDefinition;
 import es.us.isa.ppinot.model.ProcessInstanceFilter;
 import es.us.isa.ppinot.model.derived.DerivedMeasure;
 import es.us.isa.ppinot.model.derived.DerivedSingleInstanceMeasure;
-
+/*
+ * TODO make consistent with PPINOT 2.3-SNAPSHOT
+ */
 public class PrivacyAwareDerivedMeasureComputer extends DerivedMeasureComputer {
     private DerivedMeasure definition;
     private Map<String, MeasureComputer> computers;
@@ -110,12 +112,16 @@ public class PrivacyAwareDerivedMeasureComputer extends DerivedMeasureComputer {
 
         if (definition instanceof DerivedSingleInstanceMeasure) {
             measure = new MeasureInstance(definition, scope, value);
-            if (definition.isIncludeEvidences()) {
+            if (true) {
+            //TODO make consistent with PPINOT 2.3-SNAPSHOT - find out what commented out block actually does
+            //if (definition.isIncludeEvidences()) {
                 measure.addEvidence(((MeasureInstance) measure).getInstanceId(), expressionVariables);
             }
         } else {
             measure = new Measure(definition, scope, value);
-            if (definition.isIncludeEvidences()) {
+            if (true) {
+            //TODO make consistent with PPINOT 2.3-SNAPSHOT - find out what commented out block actually does
+            //if (definition.isIncludeEvidences()) {
                 measure.addEvidence(measure.getMeasureScope().getScopeInfo().toString(), expressionVariables);
             }
         }

@@ -1,4 +1,4 @@
-package pappi;
+package pappi.computers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +23,8 @@ import es.us.isa.ppinot.model.MeasureDefinition;
 import es.us.isa.ppinot.model.ProcessInstanceFilter;
 import es.us.isa.ppinot.model.aggregated.AggregatedMeasure;
 import es.us.isa.ppinot.model.base.DataMeasure;
+import pappi.aggregators.PrivacyAwareAggregator;
+import pappi.measureDefinitions.PrivacyAwareAggregatedMeasure;
 //TODO add correct parameter
 public class PrivacyAwareAggregatedMeasureComputer implements MeasureComputer{
 
@@ -106,7 +108,9 @@ public class PrivacyAwareAggregatedMeasureComputer implements MeasureComputer{
                 		);
                 Measure measure = new Measure(definition, scope, val);
                 result.add(measure);
-                if (definition.isIncludeEvidences()) {
+                //TODO make consistent with PPINOT 2.3-SNAPSHOT - find out what commented out block actually does
+                if (true) {
+                //if (definition.isIncludeEvidences()) {
                     for (String instance : scope.getInstances()) {
                         Map<String, Measure> evidence = new HashMap<String, Measure>();
                         evidence.put("base", measureMap.get(instance));

@@ -1,4 +1,4 @@
-package pappi;
+package pappi.boundary;
 
 public class Bounds {
 
@@ -14,7 +14,15 @@ public class Bounds {
 		return this.lowerBound;
 	}
 	
+	public void setLowerBound(double lowerBound) {
+		this.lowerBound = lowerBound;
+	}
+	
 	public double getUpperBound() {
 		return this.upperBound;
+	}
+	
+	public void setUpperBound(double upperBound) {
+		this.upperBound = upperBound;
 	}
 }

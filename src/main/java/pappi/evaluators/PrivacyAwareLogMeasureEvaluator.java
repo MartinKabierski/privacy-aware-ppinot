@@ -1,4 +1,4 @@
-package pappi;
+package pappi.evaluators;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +14,7 @@ import es.us.isa.ppinot.evaluation.logs.LogConfigurer;
 import es.us.isa.ppinot.evaluation.logs.LogProvider;
 import es.us.isa.ppinot.model.MeasureDefinition;
 import es.us.isa.ppinot.model.ProcessInstanceFilter;
+import pappi.computers.PrivacyAwareMeasureComputerFactory;
 
 public class PrivacyAwareLogMeasureEvaluator extends LogMeasureEvaluator {
 
