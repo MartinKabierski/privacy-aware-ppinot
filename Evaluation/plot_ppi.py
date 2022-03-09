@@ -3,39 +3,30 @@ import seaborn as sns
 import pandas as pd
 
 def main():
-    data = pd.read_csv("evaluation_sepsis_PRIPEL.csv", sep=";")
-    data['From'] = data['From'].map(lambda x: str(x)[2:-22])
-    print(data.head())
+    data = pd.read_csv("evaluation_PAPPI_PRIPEL_optimized.csv", sep=";")
+    data['From'] = data['From'].map(lambda x: str(x)[2:7])
+    print(data['From'])
     sns.set_style("ticks")
     sns.set(font_scale=2)
+    compare = False
 
     print("PPI 1")
-    plot_ppi(data, 'AvgWaitingTimeUntilAdmission', 'PPI 1: Avg waiting time until admission', 'Month', 'Time (min)', "plots/ppi1.pdf", True)
+    plot_ppi(data, 'AvgWaitingTimeUntilAdmission', 'PPI 1: Avg waiting time until admission', 'Month', 'Time (min)', "plots/ppi1_optimized_pappi.pdf", compare)
+
     print("PPI 2")
-    plot_ppi(data, 'AvgLengthOfStay', 'PPI 2: Avg length of stay', 'Month', 'Time (days)', "plots/ppi2.pdf", True)
+    plot_ppi(data, 'AvgLengthOfStay', 'PPI 2: Avg length of stay', 'Month', 'Time (days)', "plots/ppi2_optimized_pappi.pdf", compare)
+
     print("PPI 3")
-    plot_ppi(data, 'MaxLengthOfStay', 'PPI 3: Maximum length of stay', 'Month', 'Time (days)', "plots/ppi3.pdf", True)
+    plot_ppi(data, 'MaxLengthOfStay', 'PPI 3: Maximum length of stay', 'Month', 'Time (days)', "plots/ppi3_optimized_pappi.pdf", compare)
 
-    print("PPI 4.1")#used for paper
-    plot_ppi(data, '%ReturningPatientsTotalNotPrivatized', 'PPI 4: % returning patients', 'Month', 'Percentage', "plots/ppi41.pdf", True)
-    print("PPI 4.2")
-    plot_ppi(data, '%ReturningPatientsTotalPrivatized', 'PPI 4: % returning patients', 'Month', 'Percentage', "plots/ppi42.pdf", True)
-    print("PPI 4.3")
-    plot_ppi(data, '%ReturningPatientsSampleAggregate', 'PPI 4: % returning patients', 'Month', 'Percentage', "plots/ppi43.pdf", True)
+    print("PPI 4")
+    plot_ppi(data, '%ReturningPatients<28Days', 'PPI 4: % returning patients', 'Month', 'Percentage',"plots/ppi4_optimized_pappi.pdf", compare)
 
-    print("PPI 5.1")#used for paper
-    plot_ppi(data, '%AntibioticsWithinOneHourTotalNotPrivatized', 'PPI 5: % patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi51.pdf", True)
-    print("PPI 5.2")
-    plot_ppi(data, '%AntibioticsWithinOneHourTotalPrivatized', 'PPI 5: % patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi52.pdf", True)
-    print("PPI 5.3")
-    plot_ppi(data, '%AntibioticsWithinOneHourSampleAggregate', 'PPI 5: % patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi53.pdf", True)
+    print("PPI 5")
+    plot_ppi(data, '%AntibioticsWithinOneHour', 'PPI 5: % patients with antibiotics < 60 min', 'Month', 'Percentage', "plots/ppi5_optimized_pappi.pdf", compare)
 
-    print("PPI 6.1")#used for paper
-    plot_ppi(data, '%LacticAcidWithinThreeHoursTotalNotPrivatized', 'PPI 6: % patients with lactic acid < 180 min', 'Month', 'Percentage', "plots/ppi61.pdf", True)
-    print("PPI 6.2")
-    plot_ppi(data, '%LacticAcidWithinThreeHoursTotalPrivatized', 'PPI 6: % patients with lactic acid < 180 min', 'Month', 'Percentage', "plots/ppi62.pdf", True)
-    print("PPI 6.3")
-    plot_ppi(data, '%LacticAcidWithinThreeHoursSampleAggregate', 'PPI 6: % patients with lactic acid < 180 min', 'Month', 'Percentage', "plots/ppi63.pdf", True)
+    print("PPI 6")
+    plot_ppi(data, '%LacticAcidWithinThreeHours', 'PPI 6: % patients with lactic acid < 180 min', 'Month', 'Percentage', "plots/ppi6_optimized_pappi.pdf", compare)
 
 
 def plot_ppi(data, ppi_name, plot_title, x_label, y_label, save_to, compare):
@@ -74,6 +65,7 @@ def plot_ppi(data, ppi_name, plot_title, x_label, y_label, save_to, compare):
 #    else:
     plt.savefig(str(save_to), format="pdf")
     plt.show()
+
     return
 
 
