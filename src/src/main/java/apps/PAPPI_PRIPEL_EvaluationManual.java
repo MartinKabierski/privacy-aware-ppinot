@@ -327,7 +327,6 @@ public class PAPPI_PRIPEL_EvaluationManual {
 		}
 	}
 
-
 	
 	private List<Measure> computePPI(LogProvider log, MeasureDefinition measure) throws Exception {
 		//make sure normal queries can also be answered without changing Evaluator
@@ -372,14 +371,15 @@ public class PAPPI_PRIPEL_EvaluationManual {
 		cycleTime.setTo(new TimeInstantCondition("Release A", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.DAYS);
 		
-		PrivacyAwareAggregatedMeasure avgWaitingTime = new PrivacyAwareAggregatedMeasure();	
-		avgWaitingTime.setEpsilon(0.1);
-		avgWaitingTime.setBaseMeasure(cycleTime);
-		avgWaitingTime.setBoundaryEstimation(BoundaryEstimator.EXTEND);
-		avgWaitingTime.setExtensionFactor(1.6);
-		avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.MAX_EXP);
-		return avgWaitingTime;
+		PrivacyAwareAggregatedMeasure maxWaitingTime = new PrivacyAwareAggregatedMeasure();	
+		maxWaitingTime.setEpsilon(0.1);
+		maxWaitingTime.setBaseMeasure(cycleTime);
+		maxWaitingTime.setBoundaryEstimation(BoundaryEstimator.EXTEND);
+		maxWaitingTime.setExtensionFactor(1.6);
+		maxWaitingTime.setAggregationFunction(PrivacyAwareAggregator.MAX_EXP);
+		return maxWaitingTime;
 	}
+	
 	
 	private MeasureDefinition buildNoOfERReturns(boolean privatizeTotal, boolean aggregate) {
 		CountMeasure instanceCount=new CountMeasure();
@@ -433,6 +433,7 @@ public class PAPPI_PRIPEL_EvaluationManual {
 			return percentage;
 	}
 	
+	
 	private MeasureDefinition buildTimeUntilAntibiotics(boolean privatizeTotal, boolean aggregate) {
 		CountMeasure instanceCount=new CountMeasure();
 		instanceCount.setId("instances");
@@ -483,6 +484,7 @@ public class PAPPI_PRIPEL_EvaluationManual {
 		else
 			return percentage;
 	}
+	
 	
 	private MeasureDefinition buildTimeUntilLacticAcid(boolean privatizeTotal, boolean aggregate) {
 		CountMeasure instanceCount=new CountMeasure();
@@ -573,10 +575,10 @@ public class PAPPI_PRIPEL_EvaluationManual {
 		cycleTime.setTo(new TimeInstantCondition("Release A", GenericState.END));
 		cycleTime.setUnitOfMeasure(TimeUnit.DAYS);
 		
-		PrivacyAwareAggregatedMeasure avgWaitingTime = new PrivacyAwareAggregatedMeasure();	
-		avgWaitingTime.setBaseMeasure(cycleTime);
-		avgWaitingTime.setAggregationFunction(PrivacyAwareAggregator.MAX);
-		return avgWaitingTime;
+		PrivacyAwareAggregatedMeasure maxWaitingTime = new PrivacyAwareAggregatedMeasure();	
+		maxWaitingTime.setBaseMeasure(cycleTime);
+		maxWaitingTime.setAggregationFunction(PrivacyAwareAggregator.MAX);
+		return maxWaitingTime;
 	}
 	
 	
@@ -610,6 +612,7 @@ public class PAPPI_PRIPEL_EvaluationManual {
 		return percentage;
 	}
 	
+	
 	private MeasureDefinition buildTimeUntilAntibioticsNoPrivacy() {
 		CountMeasure instanceCount=new CountMeasure();
 		instanceCount.setId("instances");
@@ -638,6 +641,7 @@ public class PAPPI_PRIPEL_EvaluationManual {
 		percentage.addUsedMeasure("b", totalCases);
 		return percentage;
 	}
+	
 	
 	private MeasureDefinition buildTimeUntilLacticAcidNoPrivacy() {
 		CountMeasure instanceCount=new CountMeasure();

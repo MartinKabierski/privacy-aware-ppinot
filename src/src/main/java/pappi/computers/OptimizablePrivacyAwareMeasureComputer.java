@@ -69,7 +69,6 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
 	}
 	
 
-
 	public void update(LogEntry entry) {
         classifier.update(entry);
         for (MeasureComputer c : listGroupByMeasureComputer) {
@@ -81,6 +80,7 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
         }
     }
 
+	
     public List<? extends Measure> compute(){
     	System.out.println("===== "+this.definition.getId()+" =====\n");
         //get admissible function sets
@@ -258,9 +258,6 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
     }
 
 
-
-
-
 	//TODO get rid of return null
     //remove dependency on "lap" and "exp" in values
     private Map<MeasureDefinition, String> getUnprivatizedFunctions(List<Map<MeasureDefinition, String>> functionSets) {
@@ -277,16 +274,6 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
 		}
 		return null;
 	}
-
-
-
-	//break;
-    //simple fix, that repeatedly samples outputs. Could be used to get sample variance instead of output distribution
-    //for (int i=0; i<100;i++) {
-    //	measures = baseComputer.compute();
-    //	System.out.println(measures.toString());
-    //}
-    //System.out.println();
     
     
     private Double rmse(Map<Double, Double> distribution, Double trueValueAtScope) {
@@ -315,6 +302,7 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
     	return mean;// * (1.0/(double)distribution.size());
     }
     
+    
     public double stddev(Map<Double,Double> distribution) {
     	if (distribution.size() < 1) {
     		return Double.POSITIVE_INFINITY;
@@ -332,7 +320,6 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
     	
     	return Math.sqrt(var);
     }
-    
     
     
     public List<? extends Measure> getMeasureDistributions() {
@@ -402,7 +389,6 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
     } 
 
 
-
 	private void setFunctions(MeasureDefinition definition, Map<MeasureDefinition, String> functionSet, double epsilon) {
     	if (definition instanceof BaseMeasure) {
     		return;
@@ -428,7 +414,6 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
 			setFunctions(((AggregatedMeasure)definition).getBaseMeasure(), functionSet, epsilon);
 		}
 	}
-
 
 
 	private List<Map<MeasureDefinition, String>> getFunctionSets(MeasureDefinition definition) {
@@ -491,7 +476,6 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
     }
 	
 	
-	
     private List<Map<MeasureDefinition, String>> filterAdmissibleFunctionSets(MeasureDefinition definition,
 			List<Map<MeasureDefinition, String>> functionSets) {
     	List<Map<MeasureDefinition, String>> admissibleFunctionSets = new ArrayList();
@@ -503,6 +487,7 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
 		return admissibleFunctionSets;
 	}
 
+    
     //TODO clean up and into own class
     private boolean isAdmissible(Map<MeasureDefinition, String> functionSet, MeasureDefinition definition, boolean treePrivatized) {
     	if (definition instanceof BaseMeasure) {
@@ -565,7 +550,6 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
 	}
 
 
-
 	private List<Map<MeasureDefinition, String>> join(List<Map<MeasureDefinition, String>> first,List<Map<MeasureDefinition, String>> second){
     	List<Map<MeasureDefinition, String>> mergedMeasures = new ArrayList();
     	for (Map<MeasureDefinition, String> one : first) {
@@ -580,7 +564,6 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
     }
     
     
-
     private Collection<Double> chooseMeasuresToAggregate(MeasureScope scope, Map<String, MeasureInstance> measureMap) {
         Collection<Double> toAggregate = new ArrayList<Double>();
         for (String instance : scope.getInstances()) {
@@ -591,10 +574,12 @@ public class OptimizablePrivacyAwareMeasureComputer implements MeasureComputer, 
         return toAggregate;
     }
 
+    
     private Map<String, MeasureInstance> buildMeasureMap(Collection<? extends Measure> measures) {
     	return MeasureInstance.buildMeasureMap(measures);
     }
 
+    
     // Filter instances whose filter value is false
     private Collection<String> filterTrueInstances(Collection<String> instances, Map<String, MeasureInstance> filterMap) {
         Collection<String> found = new ArrayList<String>();

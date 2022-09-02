@@ -1,5 +1,10 @@
 package pappi.evaluators;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +19,7 @@ import com.scalified.tree.TreeNode;
 
 //import apps.MeasureDefinitionTreeNode;
 import es.us.isa.ppinot.evaluation.Measure;
+import es.us.isa.ppinot.evaluation.TemporalMeasureScope;
 import es.us.isa.ppinot.evaluation.computers.MeasureComputer;
 import es.us.isa.ppinot.evaluation.evaluators.LogMeasureEvaluator;
 import es.us.isa.ppinot.evaluation.logs.LogConfigurer;
@@ -30,13 +36,21 @@ public class PrivacyAwareLogMeasureEvaluator extends LogMeasureEvaluator {
 	    private LogProvider logProvider;
 	    private LogConfigurer configurer;
 	    private PrivacyAwareMeasureComputerFactory factory;
-
+	    
+	    private boolean writeToCSV;
 
 	    public PrivacyAwareLogMeasureEvaluator(LogProvider logProvider) {
 	    	super(logProvider);
 	        this.logProvider = logProvider;
 	        this.factory = new PrivacyAwareMeasureComputerFactory();
-	        
+	        this.writeToCSV = true;
+	    }
+	    
+	    public PrivacyAwareLogMeasureEvaluator(LogProvider logProvider, boolean writeToCSV) {
+	    	super(logProvider);
+	        this.logProvider = logProvider;
+	        this.factory = new PrivacyAwareMeasureComputerFactory();
+	        this.writeToCSV = writeToCSV;
 	    }
 
 	    public List<Measure> eval(MeasureDefinition definition, ProcessInstanceFilter filter) {
@@ -44,6 +58,11 @@ public class PrivacyAwareLogMeasureEvaluator extends LogMeasureEvaluator {
 	    }
 
 	    public Map<MeasureDefinition, List<Measure>> eval(List<MeasureDefinition> definitions, ProcessInstanceFilter filter) {
+	    	//date information for potential
+	    	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd_HH:mm:ss");  
+	    	LocalDateTime now = LocalDateTime.now();
+	    	
+	    	
 	        LogProvider logToAnalyse;
 	        Map<MeasureDefinition, List<Measure>> measures = new HashMap<MeasureDefinition, List<Measure>>();
 	        Map<MeasureComputer, MeasureDefinition> computers = new HashMap<MeasureComputer, MeasureDefinition>();    
@@ -57,6 +76,13 @@ public class PrivacyAwareLogMeasureEvaluator extends LogMeasureEvaluator {
 	        //List<List<MeasureDefinition>> sharedSubTrees = getSharedSubtrees(definitions);
 	        
 	        for (MeasureDefinition definition : definitions) {
+	        	AdmissableChecker checker = new AdmissableChecker();
+	        	if(!checker.isAdmissable(definition)) {
+	        		log.info("Provided MeasureDefinition " + definition.getId() + " is not admissible! Stopping computation!\n");
+	        		System.exit(-1);
+	        	}
+
+	        	
 	            MeasureComputer computer = factory.create(definition, filter);
 	            computers.put(computer, definition);
 	            logToAnalyse.registerListener(computer);
@@ -69,6 +95,30 @@ public class PrivacyAwareLogMeasureEvaluator extends LogMeasureEvaluator {
 	        log.info("Computing measures...");
 	        for (MeasureComputer computer : computers.keySet()) {
 	            measures.get(computers.get(computer)).addAll(computer.compute());
+	        }
+	        
+	        if(this.writeToCSV) {
+	        	for(MeasureDefinition md : measures.keySet()) {
+	        		List<Measure> results = measures.get(md);
+	        		String id = md.getId();
+	        		try {
+						BufferedWriter writer = new BufferedWriter(new FileWriter("results/" + now + "_" + id + ".csv"));
+						writer.write(String.join(";", "PPI", "from", "to", "value","\n"));
+						for(Measure m : results) {
+			        		TemporalMeasureScope tempScope = (TemporalMeasureScope) m.getMeasureScope();
+			        		writer.write(String.join(";", id, 
+			        				tempScope.getStart().toString(), 
+			        				tempScope.getEnd().toString(),
+			        				Double.toString(m.getValue()),
+			        				"\n"));
+						}
+						writer.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+	        	}
 	        }
 
 	        return measures;
