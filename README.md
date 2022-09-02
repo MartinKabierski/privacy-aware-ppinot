@@ -1,5 +1,5 @@
 # privacy-aware-ppinot
-This repository contains the Java-based source code and the evaluation files for the definition and evaluation of privacy-aware process performance indicators, as presented in the paper "[Privacy-aware Process Performance Indicators: Framework and Release Mechanisms](https://arxiv.org/abs/2103.11740)".
+This repository contains the Java-based implementation and the evaluation files for the definition and evaluation of privacy-aware process performance indicators, as presented in the paper "[Privacy-aware Process Performance Indicators: Framework and Release Mechanisms](https://arxiv.org/abs/2103.11740)".
 This package builds upon the PPI definition- and evaluation-approaches defined by the "Process Performance Indicator Notation" (PPINOT), publicly available [via Maven](https://mvnrepository.com/artifact/es.us.isa.ppinot/ppinot-model).
 
 The project extends the PPINOT definitions by introducing new aggregation measures and derived measures that guarantee differential privacy.
