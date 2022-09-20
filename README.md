@@ -55,7 +55,7 @@ If you wish to add your own release mechanisms, you can easily do this by adding
 
 Please, be aware that you are responsible for guaranteeing, that the implemented mechanism actually provides the desired privacy protection.
 ## Supplementary Data
-Additionally, we providethe result files, figures and scripts used for the creation of those figures in the publications. You can find these located in the [Evaluation](https://github.com/MartinKabierski/privacy-aware-ppinot/tree/master/Evaluation) directoy.
+Additionally, we providethe result files, figures and scripts used for the creation of those figures in the publications. You can find these located in the [Evaluation](https://github.com/MartinKabierski/privacy-aware-ppinot/tree/master/evaluation) directory.
 
 ## Citing this work
 If you use this repository or the paper in an academic article, please cite it as:
